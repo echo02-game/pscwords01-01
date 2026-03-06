@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>普通話水平測試 - 【作品1號】難點字詞練習詞卡</title>
+    <style>
+        /* 基礎設置及字體 */
+        body {
+            font-family: "Yuanti SC", "YouYuan", "STYuanti", sans-serif;
+            margin: 0;
+            padding: 75px 0 80px 0; /* 加大頂部 padding 以適應兩行標題 */
+            background-color: #f7f9fc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* 標題與頁腳 */
+        .page-title {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            padding: 12px 10px;
+            background-color: #ffffff;
+            z-index: 100;
+            margin: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        
+        /* 標題分行樣式 */
+        .title-line1 {
+            display: block;
+            font-size: 13px;
+            color: #999999; /* 顏色更淺 */
+            margin-bottom: 4px;
+            font-weight: normal;
+        }
+        .title-line2 {
+            display: block;
+            font-size: 18px;
+            color: #333333;
+            font-weight: bold;
+        }
+
+        /* 右上角計數器 */
+        #word-counter {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 15px;
+            z-index: 101;
+            font-size: 16px;
+            font-family: "Calibri", sans-serif;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            color: gray;
+            font-size: 12px;
+            text-align: center;
+            padding: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+        /* 頁面切換邏輯 */
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        /* 登錄頁面專屬居中樣式 */
+        #login-screen.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 155px);
+        }
+        #practice-screen.active, #end-screen.active {
+            display: block;
+        }
+
+        /* 登錄頁面輸入框 */
+        #login-screen input {
+            display: block;
+            width: 200px;
+            margin: 10px auto;
+            padding: 8px;
+            font-size: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: inherit;
+        }
+        
+        /* 按鈕樣式 (顏色修改為 #81A6C6) */
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            background-color: #81A6C6; /* 新顏色 */
+            color: #ffffff;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            margin: 10px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #6b93b5; /* 懸停時略微加深 */
+        }
+        #login-error {
+            color: red;
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        /* 詞卡樣式 */
+        .card-container {
+            perspective: 1000px;
+            width: 280px;
+            height: 200px;
+            margin: 30px auto;
+        }
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            border-radius: 15px;
+        }
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 15px;
+            font-size: 45px;
+            border: 2px solid #e0e0e0;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            background: #f4f8fb; 
+            border-color: #81A6C6; /* 配合按鈕顏色 */
+        }
+        .card-back .pinyin {
+            font-family: "Calibri", sans-serif;
+            font-size: 24px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        /* 結束頁面字詞列表 */
+        #word-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .word-item {
+            padding: 10px 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #eee;
+            transition: border-color 0.2s;
+        }
+        .word-item:hover {
+            border-color: #81A6C6; /* 配合按鈕顏色 */
+        }
+        .word-item .p {
+            font-family: "Calibri", sans-serif;
+            font-size: 14px;
+            color: #666;
+        }
+        .word-item .h {
+            font-size: 18px;
+        }
+
+        /* 開發者模式 */
+        #dev-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            cursor: pointer;
+            filter: grayscale(100%);
+            opacity: 0.3;
+        }
+        #dev-panel {
+            display: none;
+            position: fixed;
+            top: 60px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 999;
+            font-size: 14px;
+        }
+        #dev-panel button { margin: 5px 0; display: block; width: 100%; }
+        #dev-panel textarea { width: 100%; height: 150px; margin-top: 10px; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+    <!-- 音頻載體 -->
+    <audio id="main-audio" src="word01.mp3" preload="auto"></audio>
+
+    <!-- 開發者工具 (僅Windows可見) -->
+    <div id="dev-toggle">🛠️</div>
+    <div id="dev-panel">
+        <strong>時間軸標記工具</strong><br>
+        <div id="dev-status">等待開始...</div>
+        <button id="dev-start">開始錄製模式</button>
+        <button id="dev-mark" disabled>標記下一句 (Space)</button>
+        <textarea id="dev-output" readonly placeholder="錄製完成後，JSON代碼會顯示在這裡"></textarea>
+    </div>
+
+    <!-- 標題、計數器與頁腳 -->
+    <h1 class="page-title" style="display:none;" id="main-title">
+        <span class="title-line1">普通話水平測試</span>
+        <span class="title-line2">【作品1號】難點字詞練習詞卡</span>
+    </h1>
+    <div id="word-counter">1 / 23</div>
+    
+    <!-- 登錄頁面 -->
+    <div id="login-screen" class="screen active">
+        <h2 style="color: #666;">開始練習</h2>
+        <input type="text" id="username" placeholder="請輸入您的名字">
+        <input type="password" id="password" placeholder="請輸入密碼">
+        <div id="login-error">請輸入正確密碼</div>
+        <button id="login-btn">進入</button>
+    </div>
+
+    <!-- 練習頁面 -->
+    <div id="practice-screen" class="screen">
+        <div class="card-container" id="card-container">
+            <div class="card" id="flashcard">
+                <div class="card-face card-front" id="card-front">漢字</div>
+                <div class="card-face card-back">
+                    <div class="pinyin" id="card-pinyin">pinyin</div>
+                    <div class="hanzi" id="card-hanzi">漢字</div>
+                </div>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="prev-btn">上一個</button>
+            <button id="next-btn">下一個</button>
+        </div>
+    </div>
+
+    <!-- 結束頁面 -->
+    <div id="end-screen" class="screen">
+        <h3 style="color:#81A6C6;">恭喜完成練習，念得真不錯！</h3>
+        <p style="color: #666; font-size: 14px;">點擊下方詞語可重聽錄音</p>
+        <div id="word-list"></div>
+        <button id="restart-btn">再來一遍</button>
+    </div>
+
+    <div class="footer">
+        本網頁拼音均由AI生成，標準注音請參考《普通話水平測試實施綱要（2021年版）》。錄音僅供參考。網頁僅供VTC内部使用。職業訓練局普通話培訓測試中心版權所有。
+    </div>
+
+    <script>
+        // 詞庫數據 
+        let sentenceData = [
+    {
+        "word": "規矩",
+        "pinyin": "guī ju",
+        "start": 0,
+        "end": 1.921517
+    },
+    {
+        "word": "臘月",
+        "pinyin": "là yuè",
+        "start": 1.921517,
+        "end": 3.81552
+    },
+    {
+        "word": "初旬",
+        "pinyin": "chū xún",
+        "start": 3.81552,
+        "end": 6.303705
+    },
+    {
+        "word": "開始",
+        "pinyin": "kāi shǐ",
+        "start": 6.303705,
+        "end": 9.073361
+    },
+    {
+        "word": "時候",
+        "pinyin": "shí hou",
+        "start": 9.073361,
+        "end": 11.220169
+    },
+    {
+        "word": "展覽會",
+        "pinyin": "zhǎn lǎn huì",
+        "start": 11.220169,
+        "end": 14.644569
+    },
+    {
+        "word": "蒜瓣",
+        "pinyin": "suàn bànr",
+        "start": 14.644569,
+        "end": 16.778755
+    },
+    {
+        "word": "餃子",
+        "pinyin": "jiǎo zi",
+        "start": 16.778755,
+        "end": 18.922742
+    },
+    {
+        "word": "辣味",
+        "pinyin": "là wèir",
+        "start": 18.922742,
+        "end": 21.304012
+    },
+    {
+        "word": "忍不住",
+        "pinyin": "rěn bu zhù",
+        "start": 21.304012,
+        "end": 23.569868
+    },
+    {
+        "word": "雜拌兒",
+        "pinyin": "zá bànr",
+        "start": 23.569868,
+        "end": 25.802998
+    },
+    {
+        "word": "榛子",
+        "pinyin": "zhēn zi",
+        "start": 25.802998,
+        "end": 27.834306
+    },
+    {
+        "word": "蜜餞",
+        "pinyin": "mì jiàn",
+        "start": 27.834306,
+        "end": 30.254372
+    },
+    {
+        "word": "摻和",
+        "pinyin": "chān huo",
+        "start": 30.254372,
+        "end": 32.719995
+    },
+    {
+        "word": "零七八碎兒",
+        "pinyin": "líng qī bā suìr",
+        "start": 32.719995,
+        "end": 35.919265
+    },
+    {
+        "word": "玩意兒",
+        "pinyin": "wán yìr",
+        "start": 35.919265,
+        "end": 38.086688
+    },
+    {
+        "word": "風箏",
+        "pinyin": "fēng zheng",
+        "start": 38.086688,
+        "end": 40.399383
+    },
+    {
+        "word": "氣象",
+        "pinyin": "qì xiàng",
+        "start": 40.399383,
+        "end": 43.152664
+    },
+    {
+        "word": "擦黑兒",
+        "pinyin": "cā hēir",
+        "start": 43.152664,
+        "end": 45.786153
+    },
+    {
+        "word": "長方塊",
+        "pinyin": "cháng fāng kuàir",
+        "start": 45.786153,
+        "end": 49.386609
+    },
+    {
+        "word": "黏",
+        "pinyin": "nián",
+        "start": 49.386609,
+        "end": 51.02292
+    },
+    {
+        "word": "掃除",
+        "pinyin": "sǎo chú",
+        "start": 51.02292,
+        "end": 53.88613
+    },
+    {
+        "word": "充足",
+        "pinyin": "chōng zú",
+        "start": 53.88613,
+        "end": 56.55776
+    }
+];
+
+        let currentIndex = 0;
+        let audio = document.getElementById('main-audio');
+        let playInterval;
+
+        // 登錄邏輯
+        document.getElementById('login-btn').addEventListener('click', checkLogin);
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') checkLogin();
+        });
+
+        function checkLogin() {
+            const pwd = document.getElementById('password').value;
+            if(pwd === 'vtcpsc') {
+                document.getElementById('login-screen').classList.remove('active');
+                document.getElementById('practice-screen').classList.add('active');
+                document.getElementById('main-title').style.display = 'block';
+                document.getElementById('word-counter').style.display = 'block';
+                updateCard();
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+            }
+        }
+
+        // 詞卡邏輯
+        const flashcard = document.getElementById('flashcard');
+        flashcard.addEventListener('click', () => {
+            flashcard.classList.toggle('is-flipped');
+            playCurrentAudio();
+        });
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if(currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            }
+        });
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if(currentIndex < sentenceData.length - 1) {
+                currentIndex++;
+                updateCard();
+            } else {
+                showEndScreen();
+            }
+        });
+
+        function updateCard() {
+            flashcard.classList.remove('is-flipped');
+            document.getElementById('card-front').innerText = sentenceData[currentIndex].word;
+            document.getElementById('card-hanzi').innerText = sentenceData[currentIndex].word;
+            document.getElementById('card-pinyin').innerText = sentenceData[currentIndex].pinyin;
+            
+            // 更新計數器 A/B
+            document.getElementById('word-counter').innerText = `${currentIndex + 1} / ${sentenceData.length}`;
+        }
+
+        // 音頻播放控制 (支持切片播放)
+        function playSegment(start, end) {
+            clearInterval(playInterval);
+            audio.pause();
+            audio.currentTime = start;
+            audio.play().catch(e => console.log("等待用戶交互，或因瀏覽器安全限制未能自動播放"));
+            
+            playInterval = setInterval(() => {
+                if(audio.currentTime >= end) {
+                    audio.pause();
+                    clearInterval(playInterval);
+                }
+            }, 30);
+        }
+
+        function playCurrentAudio() {
+            const data = sentenceData[currentIndex];
+            playSegment(data.start, data.end);
+        }
+
+        // 結束頁面
+        function showEndScreen() {
+            document.getElementById('practice-screen').classList.remove('active');
+            document.getElementById('end-screen').classList.add('active');
+            document.getElementById('word-counter').style.display = 'none'; // 結束時隱藏計數器
+            
+            const list = document.getElementById('word-list');
+            list.innerHTML = '';
+            sentenceData.forEach(item => {
+                let div = document.createElement('div');
+                div.className = 'word-item';
+                div.innerHTML = `<span class="p">${item.pinyin}</span><span class="h">${item.word}</span>`;
+                div.onclick = () => playSegment(item.start, item.end);
+                list.appendChild(div);
+            });
+        }
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            currentIndex = 0;
+            document.getElementById('end-screen').classList.remove('active');
+            document.getElementById('practice-screen').classList.add('active');
+            document.getElementById('word-counter').style.display = 'block'; // 重啟時顯示計數器
+            updateCard();
+        });
+
+        /* ================= 開發者模式：時間標記 ================= */
+        // 僅在 Windows 下顯示工具圖標
+        if (navigator.userAgent.indexOf("Win") !== -1 || navigator.platform.indexOf("Win") !== -1) {
+            document.getElementById('dev-toggle').style.display = 'block';
+        }
+
+        let isRecording = false;
+        let recordIndex = 0;
+        let recordedData = [];
+
+        document.getElementById('dev-toggle').addEventListener('click', () => {
+            const panel = document.getElementById('dev-panel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        });
+
+        document.getElementById('dev-start').addEventListener('click', () => {
+            recordedData = JSON.parse(JSON.stringify(sentenceData));
+            recordIndex = 0;
+            isRecording = true;
+            document.getElementById('dev-mark').disabled = false;
+            
+            audio.currentTime = 0;
+            audio.play();
+            recordedData[0].start = 0;
+            document.getElementById('dev-status').innerText = `正在錄製: ${recordedData[0].word}`;
+        });
+
+        function markNext() {
+            if (!isRecording) return;
+            const now = audio.currentTime;
+            recordedData[recordIndex].end = now;
+            
+            recordIndex++;
+            if (recordIndex < recordedData.length) {
+                recordedData[recordIndex].start = now;
+                document.getElementById('dev-status').innerText = `正在錄製: ${recordedData[recordIndex].word}`;
+            } else {
+                // 錄製完成
+                audio.pause();
+                isRecording = false;
+                document.getElementById('dev-status').innerText = "錄製完成！";
+                document.getElementById('dev-mark').disabled = true;
+                document.getElementById('dev-output').value = JSON.stringify(recordedData, null, 4);
+                // 自動複製到剪貼板
+                navigator.clipboard.writeText(JSON.stringify(recordedData, null, 4));
+            }
+        }
+
+        document.getElementById('dev-mark').addEventListener('click', markNext);
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && isRecording) {
+                e.preventDefault(); 
+                markNext();
+            }
+        });
+
+    </script>
+</body>
+</html>
