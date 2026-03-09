@@ -71,6 +71,14 @@
             word-wrap: break-word; /* 允許長標題換行 */
         }
 
+        /* 注釋樣式：字號小、顏色淺 */
+        .title-hint {
+            color: #888888;
+            font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
         .counter {
             color: var(--color-main);
             font-size: clamp(1rem, 4vw, 1.2rem);
@@ -160,10 +168,8 @@
 
         .card-container {
             perspective: 1000px;
-            /* 放大詞卡：手機上佔據 85vw，最大寬度 500px */
             width: 85vw;
             max-width: 500px;
-            /* 保持合適比例或根據內容自適應 */
             aspect-ratio: 4/3;
             margin: 5vh auto 20px auto;
             display: flex;
@@ -192,7 +198,7 @@
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            -webkit-backface-visibility: hidden; /* Safari 相容 */
+            -webkit-backface-visibility: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -208,7 +214,6 @@
             border-color: var(--color-main);
         }
 
-        /* 字體動態縮放，確保在大詞卡中夠大 */
         .hanzi {
             font-size: clamp(45px, 12vw, 80px);
             color: #333;
@@ -241,7 +246,7 @@
         #finish-view {
             overflow-y: auto;
             justify-content: flex-start;
-            padding-bottom: 80px; /* 給底部版權留出空間 */
+            padding-bottom: 80px;
         }
 
         #finish-view h2 {
@@ -290,16 +295,16 @@
             background-color: var(--color-main);
         }
 
-        /* 底部版權宣告 - 改為相對定位，避免遮擋 iOS 底部按鈕 */
+        /* 底部版權宣告 */
         footer {
             width: 100%;
             padding: 15px;
-            padding-bottom: env(safe-area-inset-bottom, 15px); /* 適配 iOS 底部橫條 */
+            padding-bottom: env(safe-area-inset-bottom, 15px);
             font-size: 0.7rem;
             color: #999;
-            text-align: center; /* 改為置中或靠右皆可，避免遮擋 */
+            text-align: center;
             background-color: var(--color-bg);
-            margin-top: auto; /* 將 footer 推到最底部 */
+            margin-top: auto;
         }
 
         /* 開發者模式 */
@@ -342,6 +347,7 @@
         <div class="title-container">
             <h2 class="title-line1">普通話水平測試</h2>
             <h1 class="title-line2">【作品1號】難點字詞練習詞卡</h1>
+            <p class="title-hint">點擊詞卡播放示範錄音</p>
         </div>
         <div class="counter" id="counter">1/23</div>
     </header>
@@ -399,31 +405,31 @@
     <audio id="audio-player" src="word01.mp3" preload="auto"></audio>
 
     <script>
-        // === 數據定義 ===
-        let sentenceData = [ 
-            { "word": "規矩", "pinyin": "guī ju", "start": 0, "end": 1.921517 }, 
-            { "word": "臘月", "pinyin": "là yuè", "start": 1.921517, "end": 3.81552 }, 
-            { "word": "初旬", "pinyin": "chū xún", "start": 3.81552, "end": 6.303705 }, 
-            { "word": "開始", "pinyin": "kāi shǐ", "start": 6.303705, "end": 9.073361 }, 
-            { "word": "時候", "pinyin": "shí hou", "start": 9.073361, "end": 11.220169 }, 
-            { "word": "展覽會", "pinyin": "zhǎn lǎn huì", "start": 11.220169, "end": 14.644569 }, 
-            { "word": "蒜瓣", "pinyin": "suàn bànr", "start": 14.644569, "end": 16.778755 }, 
-            { "word": "餃子", "pinyin": "jiǎo zi", "start": 16.778755, "end": 18.922742 }, 
-            { "word": "辣味", "pinyin": "là wèir", "start": 18.922742, "end": 21.304012 }, 
-            { "word": "忍不住", "pinyin": "rěn bu zhù", "start": 21.304012, "end": 23.569868 }, 
-            { "word": "雜拌兒", "pinyin": "zá bànr", "start": 23.569868, "end": 25.802998 }, 
-            { "word": "榛子", "pinyin": "zhēn zi", "start": 25.802998, "end": 27.834306 }, 
-            { "word": "蜜餞", "pinyin": "mì jiàn", "start": 27.834306, "end": 30.254372 }, 
-            { "word": "摻和", "pinyin": "chān huo", "start": 30.254372, "end": 32.719995 }, 
-            { "word": "零七八碎兒", "pinyin": "líng qī bā suìr", "start": 32.719995, "end": 35.919265 }, 
-            { "word": "玩意兒", "pinyin": "wán yìr", "start": 35.919265, "end": 38.086688 }, 
-            { "word": "風箏", "pinyin": "fēng zheng", "start": 38.086688, "end": 40.399383 }, 
-            { "word": "氣象", "pinyin": "qì xiàng", "start": 40.399383, "end": 43.152664 }, 
-            { "word": "擦黑兒", "pinyin": "cā hēir", "start": 43.152664, "end": 45.786153 }, 
-            { "word": "長方塊", "pinyin": "cháng fāng kuàir", "start": 45.786153, "end": 49.386609 }, 
-            { "word": "黏", "pinyin": "nián", "start": 49.386609, "end": 51.02292 }, 
-            { "word": "掃除", "pinyin": "sǎo chú", "start": 51.02292, "end": 53.88613 }, 
-            { "word": "充足", "pinyin": "chōng zú", "start": 53.88613, "end": 56.55776 } 
+        // === 數據定義 (已更新為最新時間軸) ===
+        let sentenceData = [
+            { "word": "規矩", "pinyin": "guī ju", "start": 0, "end": 2.074802 },
+            { "word": "臘月", "pinyin": "là yuè", "start": 2.074802, "end": 4.129784 },
+            { "word": "初旬", "pinyin": "chū xún", "start": 4.129784, "end": 6.354319 },
+            { "word": "開始", "pinyin": "kāi shǐ", "start": 6.354319, "end": 9.172853 },
+            { "word": "時候", "pinyin": "shí hou", "start": 9.172853, "end": 11.673978 },
+            { "word": "展覽會", "pinyin": "zhǎn lǎn huì", "start": 11.673978, "end": 15.193627 },
+            { "word": "蒜瓣", "pinyin": "suàn bànr", "start": 15.193627, "end": 17.363738 },
+            { "word": "餃子", "pinyin": "jiǎo zi", "start": 17.363738, "end": 19.447601 },
+            { "word": "辣味", "pinyin": "là wèir", "start": 19.447601, "end": 21.79429 },
+            { "word": "忍不住", "pinyin": "rěn bu zhù", "start": 21.79429, "end": 23.927461 },
+            { "word": "雜拌兒", "pinyin": "zá bànr", "start": 23.927461, "end": 26.23426 },
+            { "word": "榛子", "pinyin": "zhēn zi", "start": 26.23426, "end": 28.413076 },
+            { "word": "蜜餞", "pinyin": "mì jiàn", "start": 28.413076, "end": 30.706718 },
+            { "word": "摻和", "pinyin": "chān huo", "start": 30.706718, "end": 33.086329 },
+            { "word": "零七八碎兒", "pinyin": "líng qī bā suìr", "start": 33.086329, "end": 35.965338 },
+            { "word": "玩意兒", "pinyin": "wán yìr", "start": 35.965338, "end": 38.414613 },
+            { "word": "風箏", "pinyin": "fēng zheng", "start": 38.414613, "end": 40.632663 },
+            { "word": "氣象", "pinyin": "qì xiàng", "start": 40.632663, "end": 43.370595 },
+            { "word": "擦黑兒", "pinyin": "cā hēir", "start": 43.370595, "end": 46.156632 },
+            { "word": "長方塊", "pinyin": "cháng fāng kuàir", "start": 46.156632, "end": 49.615817 },
+            { "word": "黏", "pinyin": "nián", "start": 49.615817, "end": 51.089652 },
+            { "word": "掃除", "pinyin": "sǎo chú", "start": 51.089652, "end": 54.06328 },
+            { "word": "充足", "pinyin": "chōng zú", "start": 54.06328, "end": 56.506294 }
         ];
 
         // === 狀態變量 ===
@@ -481,14 +487,23 @@
 
         // === 詞卡邏輯 ===
         function updateCard() {
+            // 解決閃爍：切換卡片時先關閉動畫，立刻翻回正面
+            flashcard.style.transition = 'none';
+            flashcard.classList.remove('is-flipped');
+            isFlipped = false;
+            
+            // 強制瀏覽器重繪 (Reflow)，確保無動畫狀態立刻生效
+            void flashcard.offsetWidth;
+            
+            // 恢復卡片的翻轉動畫設定
+            flashcard.style.transition = 'transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1)';
+
+            // 更新文字與計數器
             const data = sentenceData[currentIndex];
             frontHanzi.textContent = data.word;
             backHanzi.textContent = data.word;
             backPinyin.textContent = data.pinyin;
             counter.textContent = `${currentIndex + 1}/${sentenceData.length}`;
-            
-            isFlipped = false;
-            flashcard.classList.remove('is-flipped');
             
             prevBtn.disabled = currentIndex === 0;
             prevBtn.style.opacity = currentIndex === 0 ? '0.5' : '1';
